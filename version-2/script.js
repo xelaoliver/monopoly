@@ -205,7 +205,7 @@ window.onload = () => {
     }
 
     const sprites = new Image();
-    sprites.src = "favicon.png";
+    sprites.src = "player-token.png";
     sprites.onload = function() {
         var position = 0;
         function monopolyGameGoBrrr() {
