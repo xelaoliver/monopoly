@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>monopoly</title>
+    <style>
+      div {
+        display: inline-block;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas" width="800" height="600"></canvas>
+    
+    <div style="width: 300px; border: 1px solid black; padding: 3px; position: absolute; top: 8px; left: 816px; height: 300px;" id="currentLocation"></div>
+    
+    <br>
+
+    Money: £<span id="money"></span><br>
+    Streets owned: <div id="streets"></div><br>
+    Game commands:
+    <button onclick="buy('street')">Buy street</button>
+    <button onclick="buy('house')">Buy a house</button>
+    <button onclick="buy('hotel')">Buy a hotel</button>
+    <button onclick="rollDice()">Roll the dice</button>
+    Debug commands:
+    <button onclick="rollDice(true)">Move 1</button>
+    <button onclick="feature('askew')">Askew</button>
+    <button onclick="feature('topdown')">Topdown</button>
+    <button onclick="feature()">Reset</button>
+    Spin: <input type="checkbox" id="spin" onclick="feature('spin')">
+
+    <br><br>
+
+    <!-- Static HTML street template
+    <div style="border: 1px solid black; width: 150px; padding: 3px;">
+      <div style="background-color: #c47743; width: 150px; text-align: center;"><div style="font-size: 11px;">TITLE DEED</div><br>Old Kent Road</div>
+      Rent<div style="float: right">£26</div><br>
+      Rent with set<div style="float: right">£52</div><br>
+      Rent with 1 H<div style="float: right">£130</div><br>
+      Rent with 2 H<div style="float: right">£390</div><br>
+      Rent with 3 H<div style="float: right">£900</div><br>
+      Rent with 4 H<div style="float: right">£1100</div><br>
+      Rent with an H<div style="float: right">£1275</div><br>
+      <hr>
+      Houses cost<div style="float: right">£200</div>
+      Hotels cost<div style="float: right">£200</div>
+    </div>
+    -->
+    
+    <!-- Dynamic HTML street template
+    <div style="border: 1px solid black; width: 150px; padding: 3px;">
+      <div style="background-color: #c47743; width: 150px; text-align: center;" id="header">
+        <div style="font-size: 11px;">TITLE DEED</div><br>
+        <div id="streetName"></div>
+      </div>
+      Rent<div style="float: right" id="rent"></div><br>
+      Rent with set<div style="float: right" id="setRent"></div><br>
+      Rent with 1 H<div style="float: right" id="1HRent"></div><br>
+      Rent with 2 H<div style="float: right" id="2HRent"></div><br>
+      Rent with 3 H<div style="float: right" id="3HRent"></div><br>
+      Rent with 4 H<div style="float: right" id="4HRent"></div><br>
+      Rent with an H<div style="float: right" id="anHRent"></div><br>
+      <hr>
+      Houses cost<div style="float: right" id="hCost"></div><br>
+      Hotels cost<div style="float: right" id="anHCost"></div>
+    </div>
+    -->
+    
+
+    <div id="streetInventory" style="width: calc(100% - 8px);"></div>
+
+    <script src="script.js"></script>
+
+    <!--
+    <div style="display: inline-block; width: 1500px; padding: 3px;">
+      Monopoly written in HTML and Javascript by Alex Oliver. 16/01/25 - 30/01/25. <br><br> This is the demo User Interface ment for testing features and the game. The hand is a temporary image that represents the player and can be moved using the 'Roll Dice' and 'Move 1' buttons. The current street the player is on is displayed in the card to the left of this. You can change the orientation from askew, topdown and rotating. The board is drawn onto the website using a canvas where I can specify where I want and how big I want to draw a polygon. This can create the illusion of 3D. All of the street names, colours, rent, house and hotel prices are fully cusomizable! <br><br> I want to twist from the origional game by adding multiple modes: Capitalism, Communism and Anarchy, but I still have to develop the base game (framework) before I start implementing those features. I also want this game to be online so you can play with your friends (if you have any) from different 'school' computers. This will be the most painfull thing to code and also test since I need to have almost 2 tabs/computers on the webpage doing twice the work I usually do. All the code is opensource on my github: <a href="https://github.com/xelaoliver/3d2/blob/main/monopoly.js" target="_blank">github.com/xelaoliver/3d2/monopoly.js</a> and this project will have a dedicated article and page on my website: <a href="https://xelaoliver.github.io" target="_blank">xelaoliver.github.io</a> (i am broke and cannot aford a domain). For more information please email me at: <a href="mailto:dev.alexoliver@gmail.com">dev.alexoliver@gmail.com</a><br><br> - alexela, xela, alex, xelaoliver (alex oliver)
+    </div>
+    -->
+  </body>
+</html>
