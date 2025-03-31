@@ -1,12 +1,49 @@
-const canvas = document.createElement("canvas");
-canvas.width = 800; 
-canvas.height = 600;
-const ctx = canvas.getContext("2d");
+var ctx;
 
 var planeInformation = new Array();
 var planeDistances = new Array();
 var boardInformation = new Array();
 var cameraRotation = {x: 0, y: -Math.PI/2};
+
+// street name, color, cost to buy
+const streets = [
+    ["Old Kent Road", "#8b4513", 60],
+    ["Community Chest", true, true],
+    ["Whitechapel Road", "#8b4513", 60],
+    ["Income Tax", true, 200],
+    ["Kings Cross Station", true, 200],
+    ["The Angel, Islington", "#87ceeb", 100],
+    ["Chance", true, true],
+    ["Euston Road", "#87ceeb", 100],
+    ["Pentonville Road", "#87ceeb", 120],
+    ["Pall Mall", "#ff69b4", 140],
+    ["Electric Company", true, 150],
+    ["Whitehall", "#ff69b4", 140],
+    ["Northumberland Avenue", "#ff69b4", 160],
+    ["Marylebone Station", true, 200],
+    ["Bow Street", "#ffa500", 180],
+    ["Community Chest", true, true],
+    ["Great Marlborough Street", "#ffa500", 180],
+    ["Vine Street", "#ffa500", 200],
+    ["Strand", "#ff0000", 220],
+    ["Chance", true, true],
+    ["Fleet Street", "#ff0000", 220],
+    ["Trafalgar Square", "#ff0000", 240],
+    ["Fenchurch Street Station", true, 200],
+    ["Leicester Square", "#ffff00", 260],
+    ["Coventry Street", "#ffff00", 260],
+    ["Water Works", true, 150],
+    ["Piccadilly", "#ffff00", 280],
+    ["Regent Street", "#008000", 300],
+    ["Oxford Street", "#008000", 300],
+    ["Community Chest", true, true],
+    ["Bond Street", "#008000", 320],
+    ["Liverpool Street Station", true, 900],
+    ["Chance", true, true],
+    ["Park Lane", "#00008b", 350],
+    ["Super Tax", true, 100],
+    ["Mayfair", "#00008b", 400]
+]
 
 function translateVertex(vertecies, i) {
     let nX = Math.sin(cameraRotation.x)*vertecies[i+2] + Math.cos(cameraRotation.x)*vertecies[i];
@@ -31,8 +68,8 @@ function createPlane(vertecies, colour, back) {
         planeInformation[planeInformation.length-1][0].unshift((nX*(400/nZ))+canvas.width/2, (nY*(400/nZ))+canvas.height/2);
     }
 
-    if (back != undefined) {
-        planeDistances.push([back, planeInformation.length-1]);
+    if (back) {
+        planeDistances.push([Infinity, planeInformation.length-1]);
     } else {
         planeDistances.push([thisPlanesDistances.reduce((acc, c) => acc+c, 0)/thisPlanesDistances.length, planeInformation.length-1]);
     }
@@ -106,14 +143,7 @@ function getVertexFromPosition(position) {
 }
 
 window.onload = () => {
-    document.body.appendChild(canvas);
-    
-    boardInformation.push([[
-        -744, 0, -744,
-        744, 0, -744,
-        744, 0, 744,
-        -744, 0, 744
-    ], "#fff"]);
+    ctx = document.getElementById("canvas").getContext("2d");
 
     boardInformation.push([[
         1000, 0, -1000,
@@ -146,30 +176,30 @@ window.onload = () => {
             getVertexFromPosition(i).nX+82.6, 0, getVertexFromPosition(i).nZ+128,
             getVertexFromPosition(i).nX-82.6, 0, getVertexFromPosition(i).nZ+128,
             getVertexFromPosition(i).nX-82.6, 0, getVertexFromPosition(i).nZ-128
-        ], true, false, 100]);
+        ], true, false, true]);
 
         boardInformation.push([[
             getVertexFromPosition(i).nX+82.6, 0, getVertexFromPosition(i).nZ+56,
             getVertexFromPosition(i).nX+82.6, 0, getVertexFromPosition(i).nZ+128,
             getVertexFromPosition(i).nX-82.6, 0, getVertexFromPosition(i).nZ+128,
             getVertexFromPosition(i).nX-82.6, 0, getVertexFromPosition(i).nZ+56
-        ], "#955436", true, 10000]);
+        ], streets[i-1][1], true, true]);
     }
 
     for (let i = 11; i < 20; i ++) {
         boardInformation.push([[
             getVertexFromPosition(i).nX+128, 0, getVertexFromPosition(i).nZ-82.6,
             getVertexFromPosition(i).nX+128, 0, getVertexFromPosition(i).nZ+82.6,
-            getVertexFromPosition(i).nX-128, 0, getVertexFromPosition(i).nZ+82.6,
-            getVertexFromPosition(i).nX-128, 0, getVertexFromPosition(i).nZ-82.6
-        ], true, false, 9999]);
+            getVertexFromPosition(i).nX+56, 0, getVertexFromPosition(i).nZ+82.6,
+            getVertexFromPosition(i).nX+56, 0, getVertexFromPosition(i).nZ-82.6
+        ], streets[i-2][1], true, true]);
 
         boardInformation.push([[
-            getVertexFromPosition(i).nX+128, 0, getVertexFromPosition(i).nZ-128,
-            getVertexFromPosition(i).nX+128, 0, getVertexFromPosition(i).nZ+128,
-            getVertexFromPosition(i).nX+56, 0, getVertexFromPosition(i).nZ+128,
-            getVertexFromPosition(i).nX+56, 0, getVertexFromPosition(i).nZ-128
-        ], "#ff00ff", true, 10000]);
+            getVertexFromPosition(i).nX+128, 0, getVertexFromPosition(i).nZ-82.6,
+            getVertexFromPosition(i).nX+128, 0, getVertexFromPosition(i).nZ+82.6,
+            getVertexFromPosition(i).nX-128, 0, getVertexFromPosition(i).nZ+82.6,
+            getVertexFromPosition(i).nX-128, 0, getVertexFromPosition(i).nZ-82.6
+        ], true, false, true]);
     }
 
     for (let i = 21; i < 30; i ++) {
@@ -178,34 +208,34 @@ window.onload = () => {
             getVertexFromPosition(i).nX+82.6, 0, getVertexFromPosition(i).nZ+128,
             getVertexFromPosition(i).nX-82.6, 0, getVertexFromPosition(i).nZ+128,
             getVertexFromPosition(i).nX-82.6, 0, getVertexFromPosition(i).nZ-128
-        ], true, false, 9999]);
+        ], true, false, true]);
 
         boardInformation.push([[
             getVertexFromPosition(i).nX+82.6, 0, getVertexFromPosition(i).nZ-56,
             getVertexFromPosition(i).nX+82.6, 0, getVertexFromPosition(i).nZ-128,
             getVertexFromPosition(i).nX-82.6, 0, getVertexFromPosition(i).nZ-128,
             getVertexFromPosition(i).nX-82.6, 0, getVertexFromPosition(i).nZ-56
-        ], "#ff0000", true, 10000]);
+        ], streets[i-3][1], true, true]);
     }
 
     for (let i = 31; i < 40; i ++) {
+        boardInformation.push([[
+            getVertexFromPosition(i).nX-128, 0, getVertexFromPosition(i).nZ-82.6,
+            getVertexFromPosition(i).nX-128, 0, getVertexFromPosition(i).nZ+82.6,
+            getVertexFromPosition(i).nX-56, 0, getVertexFromPosition(i).nZ+82.6,
+            getVertexFromPosition(i).nX-56, 0, getVertexFromPosition(i).nZ-82.6
+        ], streets[i-4][1], true, true]);
+
         boardInformation.push([[
             getVertexFromPosition(i).nX+128, 0, getVertexFromPosition(i).nZ-82.6,
             getVertexFromPosition(i).nX+128, 0, getVertexFromPosition(i).nZ+82.6,
             getVertexFromPosition(i).nX-128, 0, getVertexFromPosition(i).nZ+82.6,
             getVertexFromPosition(i).nX-128, 0, getVertexFromPosition(i).nZ-82.6
-        ], true, false, 9999]);
-
-        boardInformation.push([[
-            getVertexFromPosition(i).nX-128, 0, getVertexFromPosition(i).nZ-128,
-            getVertexFromPosition(i).nX-128, 0, getVertexFromPosition(i).nZ+128,
-            getVertexFromPosition(i).nX-56, 0, getVertexFromPosition(i).nZ+128,
-            getVertexFromPosition(i).nX-56, 0, getVertexFromPosition(i).nZ-128
-        ], "#00ff00", true, 10000]);
+        ], true, false, true]);
     }
 
     const sprites = new Image();
-    sprites.src = "player-token.png";
+    sprites.src = "favicon.png";
     sprites.onload = function() {
         var position = 0;
         function monopolyGameGoBrrr() {
@@ -227,7 +257,7 @@ window.onload = () => {
 
             drawAll();
 
-            cameraRotation.x += .05;
+            cameraRotation.x += .01;
             cameraRotation.y = Math.sin(cameraRotation.x)*Math.PI/4-Math.PI/4;
 
             if (Math.floor(position) < 40) {
