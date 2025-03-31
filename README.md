@@ -19,6 +19,7 @@ Doesn't have:
 - Multiplayer
 - Anyway of easily adding multiplayer
 - I didn't know how to create a server
+- Everything else
 
 # version 2:
 
