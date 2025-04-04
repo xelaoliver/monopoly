@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
-    <title>monauply</title>
+    <title>monopoly</title>
     <script src="script.js"></script>
     <style>
         th, td {
@@ -26,5 +26,23 @@
             </td>
         </tr>
     </table>
+
+    <!-- displaying current position -->
+    <div style="border: 1px solid black; width: 150px; padding: 3px;">
+        <div style="background-color: #c47743; width: 150px; text-align: center;" id="header">
+          <div style="font-size: 11px;">TITLE DEED</div><br>
+          <div id="streetName"></div>
+        </div>
+        Rent<div style="float: right" id="rent"></div><br>
+        Rent with set<div style="float: right" id="setRent"></div><br>
+        Rent with 1 H<div style="float: right" id="1HRent"></div><br>
+        Rent with 2 H<div style="float: right" id="2HRent"></div><br>
+        Rent with 3 H<div style="float: right" id="3HRent"></div><br>
+        Rent with 4 H<div style="float: right" id="4HRent"></div><br>
+        Rent with an H<div style="float: right" id="anHRent"></div><br>
+        <hr>
+        Houses cost<div style="float: right" id="hCost"></div><br>
+        Hotels cost<div style="float: right" id="anHCost"></div>
+      </div>
 </body>
 </html>
