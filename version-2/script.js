@@ -7,6 +7,7 @@ var cameraRotation = {x: 0, y: -Math.PI/2};
 
 // street name, color, cost to buy
 const streets = [
+    ["Go", true, true],
     ["Old Kent Road", "#8b4513", 60],
     ["Community Chest", true, true],
     ["Whitechapel Road", "#8b4513", 60],
@@ -16,6 +17,7 @@ const streets = [
     ["Chance", true, true],
     ["Euston Road", "#87ceeb", 100],
     ["Pentonville Road", "#87ceeb", 120],
+    ["Jail", true, true],
     ["Pall Mall", "#ff69b4", 140],
     ["Electric Company", true, 150],
     ["Whitehall", "#ff69b4", 140],
@@ -25,6 +27,7 @@ const streets = [
     ["Community Chest", true, true],
     ["Great Marlborough Street", "#ffa500", 180],
     ["Vine Street", "#ffa500", 200],
+    ["Free parking", true, true],
     ["Strand", "#ff0000", 220],
     ["Chance", true, true],
     ["Fleet Street", "#ff0000", 220],
@@ -34,6 +37,7 @@ const streets = [
     ["Coventry Street", "#ffff00", 260],
     ["Water Works", true, 150],
     ["Piccadilly", "#ffff00", 280],
+    ["Go to jail", true, true],
     ["Regent Street", "#008000", 300],
     ["Oxford Street", "#008000", 300],
     ["Community Chest", true, true],
@@ -170,7 +174,7 @@ window.onload = () => {
         1000, 0, 744
     ], "#0000ff"]);
 
-    for (let i = 1; i < 10; i ++) {
+    for (let i = 0; i < 10; i ++) {
         boardInformation.push([[
             getVertexFromPosition(i).nX+82.6, 0, getVertexFromPosition(i).nZ-128,
             getVertexFromPosition(i).nX+82.6, 0, getVertexFromPosition(i).nZ+128,
@@ -183,16 +187,16 @@ window.onload = () => {
             getVertexFromPosition(i).nX+82.6, 0, getVertexFromPosition(i).nZ+128,
             getVertexFromPosition(i).nX-82.6, 0, getVertexFromPosition(i).nZ+128,
             getVertexFromPosition(i).nX-82.6, 0, getVertexFromPosition(i).nZ+56
-        ], streets[i-1][1], true, true]);
+        ], streets[i][1], true, true]);
     }
 
-    for (let i = 11; i < 20; i ++) {
+    for (let i = 10; i < 20; i ++) {
         boardInformation.push([[
             getVertexFromPosition(i).nX+128, 0, getVertexFromPosition(i).nZ-82.6,
             getVertexFromPosition(i).nX+128, 0, getVertexFromPosition(i).nZ+82.6,
             getVertexFromPosition(i).nX+56, 0, getVertexFromPosition(i).nZ+82.6,
             getVertexFromPosition(i).nX+56, 0, getVertexFromPosition(i).nZ-82.6
-        ], streets[i-2][1], true, true]);
+        ], streets[i][1], true, true]);
 
         boardInformation.push([[
             getVertexFromPosition(i).nX+128, 0, getVertexFromPosition(i).nZ-82.6,
@@ -202,7 +206,7 @@ window.onload = () => {
         ], true, false, true]);
     }
 
-    for (let i = 21; i < 30; i ++) {
+    for (let i = 20; i < 30; i ++) {
         boardInformation.push([[
             getVertexFromPosition(i).nX+82.6, 0, getVertexFromPosition(i).nZ-128,
             getVertexFromPosition(i).nX+82.6, 0, getVertexFromPosition(i).nZ+128,
@@ -215,16 +219,16 @@ window.onload = () => {
             getVertexFromPosition(i).nX+82.6, 0, getVertexFromPosition(i).nZ-128,
             getVertexFromPosition(i).nX-82.6, 0, getVertexFromPosition(i).nZ-128,
             getVertexFromPosition(i).nX-82.6, 0, getVertexFromPosition(i).nZ-56
-        ], streets[i-3][1], true, true]);
+        ], streets[i][1], true, true]);
     }
 
-    for (let i = 31; i < 40; i ++) {
+    for (let i = 30; i < 40; i ++) {
         boardInformation.push([[
             getVertexFromPosition(i).nX-128, 0, getVertexFromPosition(i).nZ-82.6,
             getVertexFromPosition(i).nX-128, 0, getVertexFromPosition(i).nZ+82.6,
             getVertexFromPosition(i).nX-56, 0, getVertexFromPosition(i).nZ+82.6,
             getVertexFromPosition(i).nX-56, 0, getVertexFromPosition(i).nZ-82.6
-        ], streets[i-4][1], true, true]);
+        ], streets[i][1], true, true]);
 
         boardInformation.push([[
             getVertexFromPosition(i).nX+128, 0, getVertexFromPosition(i).nZ-82.6,
@@ -259,6 +263,22 @@ window.onload = () => {
 
             cameraRotation.x += .01;
             cameraRotation.y = Math.sin(cameraRotation.x)*Math.PI/4-Math.PI/4;
+
+            // displaying current street name and data
+            const street = streets[Math.floor(position)];
+            document.getElementById("streetName").innerHTML = street[0];
+            document.getElementById("header").style.backgroundColor = street[1];
+
+            document.getElementById("rent").innerHTML = "£"+(street[1] == undefined?0:street[2]);
+            document.getElementById("setRent").innerHTML = "£"+(street[2] == undefined?0:street[2]);
+            document.getElementById("1HRent").innerHTML = "£"+(street[3] == undefined?0:street[3]);
+            document.getElementById("2HRent").innerHTML = "£"+(street[4] == undefined?0:street[4]);
+            document.getElementById("3HRent").innerHTML = "£"+(street[5] == undefined?0:street[5]);
+            document.getElementById("4HRent").innerHTML = "£"+(street[6] == undefined?0:street[6]);
+            document.getElementById("anHRent").innerHTML = "£"+(street[7] == undefined?0:street[7]);
+
+            document.getElementById("hCost").innerHTML = "£"+(street[8] == undefined?0:street[8]);
+            document.getElementById("anHCost").innerHTML = "£"+(street[9] == undefined?0:street[9]);
 
             if (Math.floor(position) < 40) {
                 position += .025;
