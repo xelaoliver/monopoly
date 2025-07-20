@@ -1,8 +1,8 @@
-# monopoly
+# Multiplayer Monopoly
 
 My quest to create a full-on Monopoly quadplayer game, playable inside of your browser.
 
-# version 1:
+# Version 1:
 
 ![image](https://github.com/user-attachments/assets/4c263197-05f6-4d57-a1f5-5162e2930331)
 
@@ -21,7 +21,7 @@ Doesn't have:
 - I didn't know how to create a server
 - Everything else
 
-# version 2:
+# Version 2:
 
 ![image](https://github.com/user-attachments/assets/4b014ef3-c346-48b4-bda6-b10bf52e3ec2)
 
