@@ -11,8 +11,12 @@ gameState = False
 def handle_message(msg):
     if msg[0] == "join":
         clients[request.sid] = msg[1]
-        send(["join", msg[1]], broadcast=True)
+        clientsList = []
+        for i in range(len(clients)):
+            clientsList.append(clients[list(clients.keys())[i]])
+        send(["join", msg[1], clientsList], broadcast=True)
         print(f"join: {msg[1]}")
+        print(clients)
     elif msg == "game":
         send(["game", gameState], broadcast=True)
         print(f"player has requested game statem which is {gameState}.")
