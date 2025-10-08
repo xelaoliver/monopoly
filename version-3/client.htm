@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alex Oliver's Monopoly</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <style>
+    h1 {
+      line-height: 0%;
+      size: large;
+    }
+
+    a {
+      text-decoration: none;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    .game {
+      content: "";
+      clear: both;
+      display: table;
+      width: 100%;
+      height: calc(100vh - 16px);
+    }
+
+    .box {
+      float: left;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    const socket = io("http://localhost:5000");
+
+    socket.on("connect", () => {
+      console.log("yay. server is connected to client!");
+      socket.send("game");
+      if (((window.innerWidth <= 800) && (window.innerHeight <= 600))) {
+        document.getElementById("offonline").innerHTML = 'This site requires you to have a keyboard/mouse and a display larger than 800x600px.';
+      } else {
+        document.getElementById("offonline").innerHTML = 'Name: <input type="text" id="name" autocomplete="off"> <button onclick="join()">Join</button><br><br>The server is <span style="color: green;">online</span>';
+      }
+    });
+
+    socket.on("connect_error", (err) => {
+      console.log("uh oh. client is not connected.");
+    });
+
+    socket.on("message", (msg) => {
+        console.log(msg);
+
+        if (msg[0] == "game") {
+          if (msg[1]) {
+            document.getElementById("offonline").innerHTML = 'The server is <span style="color: green;">online</span>, but a game is already in play.<br>Please wait until the game ends.';
+            console.log("game already in play");
+          } else {
+            document.getElementById("offonline").innerHTML += ' and players will be waiting in the lobby.';
+            console.log("free game availaible");
+          }
+        } else if (msg[0] == "msg") {
+          document.getElementById("log").innerHTML += `${msg[1]}: ${msg[2].replace("\n", "<br>")}<br>`;
+        } else if (msg[0] == "leave") {
+          document.getElementById("log").innerHTML += `<span style="color: maroon;">${msg[1]} has left the game.</span><br>`;
+        } else if (msg[0] == "join") {
+          document.getElementById("log").innerHTML += `<span style="color: maroon;">${msg[1]} has joined the game.</span><br>`;
+        }
+      });
+
+    function join() {
+      name = document.getElementById("name").value;
+      if (name == "") {
+        return;
+      }
+
+      socket.send(["join", name]);
+      document.getElementById("home").style.display = "none";
+      document.getElementById("game").style.display = "table";
+    }
+
+    function sendMessage() {
+      msg  = document.getElementById("message").value;
+      if (msg == "") {
+        return;
+      }
+
+      socket.send(["msg", name, msg]);
+    }
+  </script>
+</body>
+<div style="text-align: center;" id="home">
+<!-- <div style="text-align: center; display: none;" id="home"> -->
+  Alex Oliver's<br>
+  <h1>Monopoly</h1><br>
+
+  <p><span id="offonline">The server is <span style="color: red;">offline</span>, run it on your WiFi network by downloading <a href="https://github.com/xelaoliver/monopoly/blob/main/version-3/server.py" target="_blank">my server</a>,<br>or ask someone with the server to turn it online.</span></p>
+</div>
+<div id="game" class="game" style="display: none;">
+<!-- <div id="game" class="game"> -->
+  <div class="box" style="width: 75%; height: 100%;">
+    <div id="board" style="height: 75%; border: 1px black solid; padding: 8px;">
+      the board/trade window. where the fun visuals and exciting trading will take place!
+    </div>
+    
+    <div id="cards" style="height: 25%; border: 1px black solid; padding: 8px; border-top: 0px;">
+      the card visuals window. where the fun cards and their information will be!
+    </div>
+  </div>
+
+  <div class="box" style="width: 25%; height: 100%; display: flex; flex-direction: column;">
+    <div style="flex: 0 0 25%; border: 1px black solid; border-left: 0px; padding: 8px;">
+      the client's info window. where their fun name and economy would be listed!
+    </div>
+
+    <div style="flex: 0 0 75%; border: 1px black solid; padding: 8px; border-left: 0px; border-top: 0px;">
+      <div id="log" style="overflow: auto; height: calc(100% - 64px); border: 1px black solid; margin-bottom: 8px;"></div>
+
+      <div style="display: flex; gap: 8px;">
+        <textarea style="width: calc(100% - 64px); height: 56px; resize: none;" id="message"></textarea>
+        <button style="width: 56px; height: 56px;" onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+</html>
