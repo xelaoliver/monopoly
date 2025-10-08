@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -19,22 +20,44 @@
       box-sizing: border-box;
     }
 
-    .game {
-      content: "";
-      clear: both;
-      display: table;
-      width: 100%;
-      height: calc(100vh - 16px);
+    .container {
+      display: grid;
+      grid-template-areas: "left center right";
+      grid-template-columns: 225px 1fr 225px;
+      gap: 7px;
+      width: calc(100% - 400px);
+      margin: auto;
     }
 
-    .box {
-      float: left;
+    .name {
+      padding: 7px;
+      margin: -7px;
+      width: 106.75%;
+    }
+
+    .left, .center, .right {
+      border: 1px solid #cecece;
+      padding: 7px;
+    }
+
+    .left {
+      grid-area: left;
+    }
+
+    .center {
+      grid-area: center;
+    }
+
+    .right {
+      grid-area: right;
     }
   </style>
 </head>
+
 <body>
   <script>
     const socket = io("http://localhost:5000");
+    offonline = true;
 
     socket.on("connect", () => {
       console.log("yay. server is connected to client!");
@@ -51,24 +74,37 @@
     });
 
     socket.on("message", (msg) => {
-        console.log(msg);
+      console.log(msg);
 
-        if (msg[0] == "game") {
-          if (msg[1]) {
-            document.getElementById("offonline").innerHTML = 'The server is <span style="color: green;">online</span>, but a game is already in play.<br>Please wait until the game ends.';
-            console.log("game already in play");
-          } else {
-            document.getElementById("offonline").innerHTML += ' and players will be waiting in the lobby.';
-            console.log("free game availaible");
-          }
-        } else if (msg[0] == "msg") {
-          document.getElementById("log").innerHTML += `${msg[1]}: ${msg[2].replace("\n", "<br>")}<br>`;
-        } else if (msg[0] == "leave") {
-          document.getElementById("log").innerHTML += `<span style="color: maroon;">${msg[1]} has left the game.</span><br>`;
-        } else if (msg[0] == "join") {
-          document.getElementById("log").innerHTML += `<span style="color: maroon;">${msg[1]} has joined the game.</span><br>`;
+      if (msg[0] == "game" && offonline) {
+        if (msg[1]) {
+          document.getElementById("offonline").innerHTML = 'The server is <span style="color: green;">online</span>, but a game is already in play.<br>Please wait until the game ends.';
+          console.log("game already in play");
+        } else {
+          document.getElementById("offonline").innerHTML += ' and players will be waiting in the lobby.';
+          console.log("free game availaible");
         }
-      });
+        offonline = false;
+      } else if (msg[0] == "msg") {
+        document.getElementById("log").innerHTML = `${msg[1]}: ${msg[2].replace("\n", "<br>")}<br>`+document.getElementById("log").innerHTML;
+      } else if (msg[0] == "leave") {
+        document.getElementById("log").innerHTML = `<span style="color: maroon;">${msg[1]} has left the game.</span><br>`+document.getElementById("log").innerHTML;
+      } else if (msg[0] == "join") {
+        document.getElementById("player-number").innerHTML = msg[2].length;
+
+        document.getElementById("player-list").textContent = "";
+        for (let i = 0; i < msg[2].length; i++) {
+          const client = document.createElement("li");
+          client.textContent = msg[2][i];
+          client.id = msg[2][i];
+          document.getElementById("player-list").appendChild(client);
+        }
+
+        document.getElementById("log").innerHTML = `<span style="color: maroon;">${msg[1]} has joined the game.</span><br>`+document.getElementById("log").innerHTML;
+      }
+
+      document.getElementById("log").scrollTop = 0;
+    });
 
     function join() {
       name = document.getElementById("name").value;
@@ -78,64 +114,46 @@
 
       socket.send(["join", name]);
       document.getElementById("home").style.display = "none";
-      document.getElementById("game").style.display = "table";
+      document.getElementById("game").style.display = "grid";
     }
 
     function sendMessage() {
-      msg  = document.getElementById("message").value;
+      msg = document.getElementById("message").value;
       if (msg == "") {
         return;
       }
 
       socket.send(["msg", name, msg]);
+      document.getElementById("message").value = "";
     }
   </script>
 </body>
-<!-- <div style="text-align: center;" id="home"> -->
-<div style="text-align: center; display: none;" id="home">
+<div style="text-align: center;" id="home">
+<!-- <div style="text-align: center; display: none;" id="home"> -->
   Alex Oliver's<br>
   <h1>Monopoly</h1><br>
 
-  <p><span id="offonline">The server is <span style="color: red;">offline</span>, run it on your WiFi network by downloading <a href="https://github.com/xelaoliver/monopoly/blob/main/version-3/server.py" target="_blank">my server</a>,<br>or ask someone with the server to turn it online.</span></p>
+  <p><span id="offonline">The server is <span style="color: red;">offline</span>, run it on your WiFi network by
+      downloading <a href="https://github.com/xelaoliver/monopoly/blob/main/version-3/server.py" target="_blank">my
+        server</a>,<br>or ask someone with the server to turn it online.</span></p>
 </div>
-<!-- <div id="game" class="game" style="display: none;"> -->
-<div id="game" class="container">
+
+<div id="game" class="container" style="display: none;">
+<!-- <div id="game" class="container"> -->
   <div class="left">
-    asdf
+    <div class="name" style="background-color: #fce1f4;"><u>Game Information</u></div><br>
+    Player List (<span id="player-number"></span>):
+    <ul id="player-list"></ul>
   </div>
   <div class="center">
-    fdsa
+    the board/trade window. where the fun visuals and exciting trading will take place!
   </div>
   <div class="right">
-    dsfa
+    <div class="name" style="background-color: #ffdeac;">
+      <u>Chat and Game Log</u>
+      <input id="message" type="text" style="width: 100%; margin-top: 8px;"><br><button onclick="sendMessage()" style="margin-top: 8px;">Send</button>
+    </div><br>
+    <div id="log" style="overflow: auto; height: 100%; margin-top: -4px;"></div>
   </div>
 </div>
-<!--
-<div id="game" class="game">
-  <div class="box" style="width: 75%; height: 100%;">
-    <div id="board" style="height: 75%; border: 1px black solid; padding: 8px;">
-      the board/trade window. where the fun visuals and exciting trading will take place!
-    </div>
-    
-    <div id="cards" style="height: 25%; border: 1px black solid; padding: 8px; border-top: 0px;">
-      the card visuals window. where the fun cards and their information will be!
-    </div>
-  </div>
-
-  <div class="box" style="width: 25%; height: 100%; display: flex; flex-direction: column;">
-    <div style="flex: 0 0 25%; border: 1px black solid; border-left: 0px; padding: 8px;">
-      the client's info window. where their fun name and economy would be listed!
-    </div>
-
-    <div style="flex: 0 0 75%; border: 1px black solid; padding: 8px; border-left: 0px; border-top: 0px;">
-      <div id="log" style="overflow: auto; height: calc(100% - 64px); border: 1px black solid; margin-bottom: 8px;"></div>
-
-      <div style="display: flex; gap: 8px;">
-        <textarea style="width: calc(100% - 64px); height: 56px; resize: none;" id="message"></textarea>
-        <button style="width: 56px; height: 56px;" onclick="sendMessage()">Send</button>
-      </div>
-    </div>
-  </div>
-</div>
--->
 </html>
