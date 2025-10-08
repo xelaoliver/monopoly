@@ -33,3 +33,7 @@ Has: (as of March 30)
 
 Doesn't have:
 - All the rest
+
+# Version 3:
+
+This project is still undergoing, with a proper server! It's hosted on your WiFi network so it won't work to connect different clients with different IPs, but in schools/cafes/librarys it should work solid.
