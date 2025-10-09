@@ -17,17 +17,26 @@
   Alex Oliver's<br>
   <h1>Monopoly</h1><br>
 
-  <p><span id="offonline">The server is <span style="color: red;">offline</span>, run it on your WiFi network by
-      downloading <a href="https://github.com/xelaoliver/monopoly/blob/main/version-3/server.py" target="_blank">my
-        server</a>,<br>or ask someone with the server to turn it online.</span></p>
+  <p><span id="offonline">
+    The server is <span style="color: red;">offline</span>
+    , run it on your WiFi network by
+    downloading <a href="https://github.com/xelaoliver/monopoly/blob/main/version-3/server.py" target="_blank">my
+    server</a>,<br>or ask someone with the server to turn it online.
+  </span></p>
 </div>
 
 <div id="game" class="container" style="display: none;">
 <!-- <div id="game" class="container"> -->
   <div class="left">
     <div class="name" style="background-color: #fce1f4;"><u>Game Information</u></div><br>
+    <div style="text-align: center;">
+      <button class="info-button" onclick="voteStart()" id="vote-start">Vote Start</button>
+      <p><select class="info-button" style="width: calc(100% - 125px);" id="vote-kick"></select> <button onclick="voteKick()">Vote Kick</button></p>
+    </div>
+    <hr>
     Player List (<span id="player-number"></span>):
-    <ul id="player-list"></ul>
+    <ul id="player-list"></ul><hr>
+    <div style="text-align: center;">Alex Oliver's Monopoly is open source, free to play and licensed under MIT.</div>
   </div>
   <div class="center">
     the board/trade window. where the fun visuals and exciting trading will take place!
@@ -37,7 +46,7 @@
       <u>Chat and Game Log</u>
       <input id="message" type="text" style="width: 100%; margin-top: 8px;"><br><button onclick="sendMessage()" style="margin-top: 8px;">Send</button>
     </div><br>
-    <div id="log" style="overflow: auto; height: 100%; margin-top: -4px;"></div>
+    <div id="log" style="overflow: auto; line-break: anywhere; height: 100%; margin-top: -4px;"></div>
   </div>
 </div>
 </html>
