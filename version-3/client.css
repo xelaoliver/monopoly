@@ -11,12 +11,24 @@ a {
     box-sizing: border-box;
 }
 
+hr {
+    width: 100%;
+    border: 1px solid #cecece;
+    border-top: 0px;
+}
+
+.info-button {
+    width: calc(100% - 50px);
+    text-align: center;
+}
+
 .container {
     display: grid;
     grid-template-areas: "left center right";
     grid-template-columns: 225px 1fr 225px;
     gap: 7px;
     width: calc(100% - 400px);
+    height: calc(100vh - 128px);
     margin: auto;
 }
 
