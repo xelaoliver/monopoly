@@ -1,0 +1,44 @@
+h1 {
+    line-height: 0%;
+    size: large;
+}
+
+a {
+    text-decoration: none;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.container {
+    display: grid;
+    grid-template-areas: "left center right";
+    grid-template-columns: 225px 1fr 225px;
+    gap: 7px;
+    width: calc(100% - 400px);
+    margin: auto;
+}
+
+.name {
+    padding: 7px;
+    margin: -7px;
+    width: 106.75%;
+}
+
+.left, .center, .right {
+    border: 1px solid #cecece;
+    padding: 7px;
+}
+
+.left {
+    grid-area: left;
+}
+
+.center {
+    grid-area: center;
+}
+
+.right {
+    grid-area: right;
+}
