@@ -30,9 +30,32 @@
   <div class="left">
     <div class="name" style="background-color: #fce1f4;"><u>Game Information</u></div><br>
     <div style="text-align: center;">
-      <button class="info-button" onclick="voteStart()" id="vote-start">Vote Start</button>
-      <p><select class="info-button" style="width: calc(100% - 125px);" id="vote-kick"></select> <button onclick="voteKick()">Vote Kick</button></p>
+      <select class="info-button" id="game-type">
+        <option title="Game goes on unitl you quit">Never ending economy</option>
+        <option title="Russian version">Communist</option>
+        <option title="First to $10,000 wins the game">First to £10,000</option>
+        <option title="First to $100,000 wins the game">First to £100,000</option>
+        <option title="First to $1,000,000 wins the game">First to £1,000,000</option>
+      </select><br><br>
+
+      <button class="info-button" onclick="voteStart(true)" id="vote-start">Vote Start</button>
+      <button class="info-button" onclick="voteStart(false)" style="display: none;" id="vote-hold-start">Vote Hold Start</button>
+
+      <hr>
     </div>
+
+    Name: <span id="name-display"></span><br>
+    Wealth: <span id="money-display"></span><br>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span>Icon:</span>
+      <img src="tokens.png" id="display-token" style="width: 64px; height: 64px; object-fit: cover; object-position: left;">
+    </div>
+    Total turns: <span id="total-turns"></span>
+
+    <p style="text-align: center;">
+      <select class="info-button" style="width: calc(100% - 125px);" id="vote-kick"></select> <button onclick="voteKick()">Vote Kick</button><br>
+    </p>
+
     <hr>
     Player List (<span id="player-number"></span>):
     <ul id="player-list"></ul><hr>
