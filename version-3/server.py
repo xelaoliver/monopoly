@@ -16,6 +16,8 @@ def handle_message(msg):
     print(f"received: {msg}")
 
     if msg[0] == "join":
+        # add client to list and broadcast join message
+
         clients[request.sid] = msg[1]
         votekick.append(msg[1])
         votekick.append(0)
@@ -26,9 +28,13 @@ def handle_message(msg):
         print(f"join: {msg[1]}")
         print("clients:", clients, "client names:", clientsList)
     elif msg == "game":
+        # send the game status to anyone who has loaded onto the homepage
+
         send(["game", gameState], broadcast=request.sid)
         print(f"player has requested game statem which is {gameState}.")
     elif msg[0] == "newclient":
+        # verify that their name is not already in the game
+
         clientsList = list(clients.values())
 
         if msg[1] in clientsList:
@@ -39,12 +45,18 @@ def handle_message(msg):
             send(["newclientreturn", True], to=request.sid)
             print("client put in new name:", msg[1])
     elif msg[0] == "votekick":
+        # cast a democratic vote (defeats the whole point of communist mode) to kick a player, that way no one player is stalin
+
         i = votekick.index(msg[1])+1
         votekick[i] += 1
 
-        if votekick[i] >= len(clients)/2:
-            send("kick", to=list(clients.keys())[list(clients.values()).index(msg[1])])
-            clients.pop(list(clients.keys())[list(clients.values()).index(msg[1])])
+        if votekick[i] >= (3*len(clients))/4:
+            # should probally make it so votes go down after like 60 seconds to prevent just one person from 
+            # vote kicking everyone off the game
+
+            sid = list(clients.keys())[list(clients.values()).index(msg[1])]
+            send("kick", to=sid)
+            clients.pop(sid)
 
             clientsList = list(clients.values())
             send(["leave", msg[1], clientsList], broadcast=True)
@@ -54,8 +66,10 @@ def handle_message(msg):
         else:
             send(["votekick", msg[1], msg[2]], broadcast=True)
     elif msg[0] == "votestart":
+        # cast a democratic vote to start the game, also works for holding the start of the game
+
         voteStart += 1
-        if voteStart >= len(clients)/2:
+        if voteStart >= (3*len(clients))/4:
             gameState = True
             send("gamestart", broadcast=True)
         else:
@@ -68,6 +82,8 @@ def handle_message(msg):
 
 @socketio.on('disconnect')
 def handle_disconnect():
+    # sends to all clients that one of them as left
+    
     global gameState
 
     name = clients.pop(request.sid, None)
@@ -79,6 +95,8 @@ def handle_disconnect():
         playersInLobby()
 
 def playersInLobby():
+    # simple, it just does smth when no players are in the lobby
+
     global gameState
     clientsList = list(clients.values())
 
