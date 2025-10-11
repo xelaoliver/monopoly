@@ -106,6 +106,12 @@ socket.on("message", (msg) => {
             document.getElementById("name-display").innerHTML = name;
 
             document.getElementById("name").value = "";
+            
+            // start board rendering
+            let script = document.createElement('script');
+            script.src = "board.js";
+            script.type = "module";
+            document.body.appendChild(script);
         } else {
             console.log("not good name");
 
