@@ -68,12 +68,15 @@ def handle_message(msg):
     elif msg[0] == "votestart":
         # cast a democratic vote to start the game, also works for holding the start of the game
 
+        clientsList = list(clients.values())
+
         voteStart += 1
-        if voteStart >= (3*len(clients))/4:
+        print("votes to start:", voteStart, " and number of clients:", len(clientsList))
+        if voteStart > len(clientsList)/2: # old version: voteStart >= (3*len(clients))/4
             gameState = True
             send("gamestart", broadcast=True)
         else:
-            send(["votestart", msg[1]], broadcast=True)
+            send(["votestart", msg[1], msg[2]], broadcast=True)
     elif msg[0] == "voteholdstart":
         voteStart -= 1
         send(["voteholdstart", msg[1]], broadcast=True)
@@ -93,6 +96,11 @@ def handle_disconnect():
         send(["leave", name, clientsList], broadcast=True)
         print(f"leave: {name}")
         playersInLobby()
+
+        if clientsList == 0:
+            voteStart = 0
+        elif not gameState:
+            voteStart -= 1
 
 def playersInLobby():
     # simple, it just does smth when no players are in the lobby
