@@ -125,16 +125,25 @@ socket.on("message", (msg) => {
         document.getElementById("game").style.display = "none";
     } else if (msg[0] == "votekick") {
         // Player has cast a vote to kick Player. the server handles all of that
-        document.getElementById("log").innerHTML = `<span style="color: red;">${msg[2]} has cast a vote to kick ${msg[1]}.</span><br>`+document.getElementById("log").innerHTML;
+        document.getElementById("log").innerHTML = `
+            <span style="color: red;">${msg[2]} has cast a vote to kick ${msg[1]}.</span><br>
+        `+document.getElementById("log").innerHTML;
     } else if (msg[0] == "votestart") {
         // Player has cast a vote to start the game. the server, again, handles all of that
-        document.getElementById("log").innerHTML = `<span style="color: red;">${msg[1]} has cast a vote to start the game.</span><br>`+document.getElementById("log").innerHTML;
+        document.getElementById("log").innerHTML = `
+            <span style="color: red;">${msg[1]} has cast a vote to start the game in ${msg[2].toLowerCase()} mode.</span><br>
+        `+document.getElementById("log").innerHTML;
     } else if (msg[0] == "voteholdstart") {
         // Player has cast a vote to hold the start of the game. guess what? the server handles all of that
-        document.getElementById("log").innerHTML = `<span style="color: red;">${msg[1]} has cast a vote to hold the start of the game.</span><br>`+document.getElementById("log").innerHTML;
+        document.getElementById("log").innerHTML = `
+            <span style="color: red;">${msg[1]} has cast a vote to hold the start of the game.</span><br>
+        `+document.getElementById("log").innerHTML;
     } else if (msg == "gamestart") {
         // game initialates and clients can play Alex Oliver's Monopoly
         console.log("!!!!!game has started!!!!!");
+        document.getElementById("log").innerHTML = `
+            <span style="color: red;">The game has started.</span><br>
+        `+document.getElementById("log").innerHTML;
 
         // hide vote-start
         document.getElementById("game-begin-options").style.display = "none";
