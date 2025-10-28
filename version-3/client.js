@@ -1,116 +1,215 @@
-from flask import Flask, request
-from flask_socketio import SocketIO, send
+const socket = io("http://localhost:5000");
+offonline = true;
+nameVerify = false;
+oldVoteKickName = "";
 
-app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*")
+socket.on("connect", () => {
+    console.log("yay. server is connected to client!");
 
-clients = {}
-votekick = []
-voteStart = 0
-gameState = False
+    // status of the server
+    if (((window.innerWidth <= 800) && (window.innerHeight <= 600))) {
+        document.getElementById("offonline").innerHTML = 'This site requires you to have a keyboard/mouse and a display larger than 800x600px.';
+    } else {
+        document.getElementById("offonline").innerHTML = `
+        Name: <input type="text" id="name" autocomplete="off"> <button onclick="join()">
+        Join</button><br><br>The server is <span style="color: green;">online</span>`;
+        socket.send("game");
+    }
+});
 
-@socketio.on('message')
-def handle_message(msg):
-    global gameState
-    global voteStart
-    print(f"received: {msg}")
+socket.on("connect_error", (err) => {
+    // debug information
+    console.log("uh oh. client is not connected: "+err);
+});
 
-    if msg[0] == "join":
-        # add client to list and broadcast join message
+socket.on("message", (msg) => {
+    console.log(msg);
 
-        clients[request.sid] = msg[1]
-        votekick.append(msg[1])
-        votekick.append(0)
-        
-        clientsList = list(clients.values())
-        
-        send(["join", msg[1], clientsList], broadcast=True)
-        print(f"join: {msg[1]}")
-        print("clients:", clients, "client names:", clientsList)
-    elif msg == "game":
-        # send the game status to anyone who has loaded onto the homepage
+    if (msg[0] == "game" && offonline) {
+        // status of the server's lobby
+        if (msg[1]) {
+            document.getElementById("offonline").innerHTML = `
+            The server is <span style="color: green;">online</span>
+            , but a game is already in play.<br>Please wait until the game ends.`;
+            console.log("game already in play");
+        } else {
+            document.getElementById("offonline").innerHTML += ' and players will be waiting in the lobby.';
+            console.log("free game availaible");
+        }
 
-        send(["game", gameState], broadcast=request.sid)
-        print(f"player has requested game statem which is {gameState}.")
-    elif msg[0] == "newclient":
-        # verify that their name is not already in the game
+        offonline = false;
+    } else if (msg[0] == "msg") {
+        document.getElementById("log").innerHTML = `${msg[1]}: ${msg[2].replace("\n", "<br>")}<br>`+document.getElementById("log").innerHTML;
+    } else if (msg[0] == "leave") {   
+        // Player has left the game.
+        document.getElementById("log").innerHTML = `<span style="color: red;">${msg[1]} has left the game.</span><br>`+document.getElementById("log").innerHTML;
 
-        clientsList = list(clients.values())
+        // change player-number and player-list so its in sync w/ the server
+        document.getElementById("player-number").innerHTML = msg[2].length;
+        document.getElementById("player-list").textContent = "";
+        for (let i = 0; i < msg[2].length; i++) {
+            const client = document.createElement("li");
+            client.textContent = msg[2][i];
+            client.id = msg[2][i];
+            
+            document.getElementById("player-list").appendChild(client);
+        }
 
-        if msg[1] in clientsList:
-            send(["newclientreturn", False], to=request.sid)
-            print("client attempted to put in already existing name:", msg[1])
-        else:
-            clients[request.sid] = msg[1]
-            send(["newclientreturn", True], to=request.sid)
-            print("client put in new name:", msg[1])
-    elif msg[0] == "votekick":
-        # cast a democratic vote (defeats the whole point of communist mode) to kick a player, that way no one player is stalin
+        // change vote-kick options so its in sync w/ the server
+        document.getElementById("vote-kick").textContent = "";
+        for (let i = 0; i < msg[2].length; i++) {
+            const client = document.createElement("option");
+            client.textContent = msg[2][i];
+            client.id = msg[2][i];
+            client.value = msg[2][i];
+            
+            document.getElementById("vote-kick").appendChild(client);
+        }
+    } else if (msg[0] == "join") {
+        // change player-number and player-list so its in sync w/ the server
+        document.getElementById("player-number").innerHTML = msg[2].length;
+        document.getElementById("player-list").textContent = "";
+        for (let i = 0; i < msg[2].length; i++) {
+            const client = document.createElement("li");
+            client.textContent = msg[2][i];
+            client.id = msg[2][i];
+            
+            document.getElementById("player-list").appendChild(client);
+        }
 
-        i = votekick.index(msg[1])+1
-        votekick[i] += 1
+        // change vote-kick options so its in sync w/ the server
+        document.getElementById("vote-kick").textContent = "";
+        for (let i = 0; i < msg[2].length; i++) {
+            const client = document.createElement("option");
+            client.textContent = msg[2][i];
+            client.id = msg[2][i];
+            client.value = msg[2][i];
+            
+            document.getElementById("vote-kick").appendChild(client);
+        }
 
-        if votekick[i] >= (3*len(clients))/4:
-            # should probally make it so votes go down after like 60 seconds to prevent just one person from 
-            # vote kicking everyone off the game
+        // Player has joined the game.
+        document.getElementById("log").innerHTML = `<span style="color: red;">${msg[1]} has joined the game.</span><br>`+document.getElementById("log").innerHTML;
+    } else if (msg[0] == "newclientreturn") {
+        // checks if inputted name is already a client in the server
 
-            sid = list(clients.keys())[list(clients.values()).index(msg[1])]
-            send("kick", to=sid)
-            clients.pop(sid)
+        nameVerify = msg[1];
+        if (nameVerify) {
+            console.log("good name");
 
-            clientsList = list(clients.values())
-            send(["leave", msg[1], clientsList], broadcast=True)
+            socket.send(["join", name]);
 
-            print("kicked:", msg[1])
-            playersInLobby()
-        else:
-            send(["votekick", msg[1], msg[2]], broadcast=True)
-    elif msg[0] == "votestart":
-        # cast a democratic vote to start the game, also works for holding the start of the game
+            // remove homepage, display game page
+            document.getElementById("home").style.display = "none";
+            document.getElementById("game").style.display = "grid";
 
-        clientsList = list(clients.values())
+            document.getElementById("name-display").innerHTML = name;
 
-        voteStart += 1
-        print("votes to start:", voteStart, " and number of clients:", len(clientsList))
-        if voteStart > len(clientsList)/2: # old version: voteStart >= (3*len(clients))/4
-            gameState = True
-            send("gamestart", broadcast=True)
-        else:
-            send(["votestart", msg[1], msg[2]], broadcast=True)
-    elif msg[0] == "voteholdstart":
-        voteStart -= 1
-        send(["voteholdstart", msg[1]], broadcast=True)
-    else:
-        send(msg, broadcast=True)
+            document.getElementById("name").value = "";
+            
+            // start board rendering
+            let script = document.createElement('script');
+            script.src = "board.js";
+            script.type = "module";
+            document.body.appendChild(script);
+        } else {
+            console.log("not good name");
 
-@socketio.on('disconnect')
-def handle_disconnect():
-    # sends to all clients that one of them as left
-    
-    global gameState
+            alert("This name has been taken by "+name+", please use another one.");
+        }
+    } else if (msg == "kick") {
+        console.log("you have been kicked, lol");
 
-    name = clients.pop(request.sid, None)
-    if name:
-        clientsList = list(clients.values())
+        // remove game page, display homepage, automatically removes client from client list in server
+        document.getElementById("home").style.display = "inline";
+        document.getElementById("game").style.display = "none";
+    } else if (msg[0] == "votekick") {
+        // Player has cast a vote to kick Player. the server handles all of that
+        document.getElementById("log").innerHTML = `
+            <span style="color: red;">${msg[2]} has cast a vote to kick ${msg[1]}.</span><br>
+        `+document.getElementById("log").innerHTML;
+    } else if (msg[0] == "votestart") {
+        // Player has cast a vote to start the game. the server, again, handles all of that
+        document.getElementById("log").innerHTML = `
+            <span style="color: red;">${msg[1]} has cast a vote to start the game in ${msg[2].toLowerCase()} mode.</span><br>
+        `+document.getElementById("log").innerHTML;
+    } else if (msg[0] == "voteholdstart") {
+        // Player has cast a vote to hold the start of the game. guess what? the server handles all of that
+        document.getElementById("log").innerHTML = `
+            <span style="color: red;">${msg[1]} has cast a vote to hold the start of the game.</span><br>
+        `+document.getElementById("log").innerHTML;
+    } else if (msg == "gamestart") {
+        // game initialates and clients can play Alex Oliver's Monopoly
+        console.log("!!!!!game has started!!!!!");
+        document.getElementById("log").innerHTML = `
+            <span style="color: red;">The game has started.</span><br>
+        `+document.getElementById("log").innerHTML;
 
-        send(["leave", name, clientsList], broadcast=True)
-        print(f"leave: {name}")
-        playersInLobby()
+        // hide vote-start
+        document.getElementById("game-begin-options").style.display = "none";
+    }
 
-        if clientsList == 0:
-            voteStart = 0
-        elif not gameState:
-            voteStart -= 1
+    // scroll chat/game log to the top
+    document.getElementById("log").scrollTop = 0;
+});
 
-def playersInLobby():
-    # simple, it just does smth when no players are in the lobby
+function join() {
+    name = document.getElementById("name").value;
 
-    global gameState
-    clientsList = list(clients.values())
+    if (name == "") {
+        return;
+    }
 
-    if len(clientsList) == 0:
-        gameState = False
-        
-        print("no players are in the lobby.")
+    // see line 92
+    socket.send(["newclient", name]);
+}
 
-socketio.run(app, host='0.0.0.0', port=5000)
+function sendMessage() {
+    msg = document.getElementById("message").value;
+
+    if (msg == "") {
+        return;
+    }
+
+    socket.send(["msg", name, msg]);
+    document.getElementById("message").value = "";
+}
+
+function voteStart(start) {
+    // get game type from <select> in html
+    const gameOption = document.getElementById("game-type").value;
+
+    if (start) {
+        socket.send(["votestart", name, gameOption]);
+
+        // show vote-hold-start and hide vote-start
+        document.getElementById("vote-start").style.display = "none";
+        document.getElementById("vote-hold-start").style.display = "inline";
+
+        console.log("voted to start");
+    } else {
+        socket.send(["voteholdstart", name, gameOption]);
+
+        // show vote-hold-start and hide vote-start
+        document.getElementById("vote-start").style.display = "inline";
+        document.getElementById("vote-hold-start").style.display = "none";
+
+        console.log("voted to hold start");
+    }
+}
+
+function voteKick() {
+    // get client from <select> in html
+    var voteKickName = document.getElementById("vote-kick").value;
+
+    if (voteKickName != oldVoteKickName) {
+        socket.send(["votekick", voteKickName, name]);
+
+        console.log("voted to kick "+voteKickName);
+    } else {
+        console.log("already voted to kick "+voteKickName);
+    }
+
+    // make it so that the client can only kick another client one time in a row
+    oldVoteKickName = voteKickName;
+}
