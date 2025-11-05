@@ -1,14 +1,17 @@
 const socket = io("http://localhost:5000");
-offonline = true;
-nameVerify = false;
-oldVoteKickName = "";
+var offonline = true;
+var nameVerify = false;
+var oldVoteKickName = "";
+var playerInformation = {};
 
 socket.on("connect", () => {
     console.log("yay. server is connected to client!");
 
     // status of the server
     if (((window.innerWidth <= 800) && (window.innerHeight <= 600))) {
-        document.getElementById("offonline").innerHTML = 'This site requires you to have a keyboard/mouse and a display larger than 800x600px.';
+        document.getElementById("offonline").innerHTML = `
+        This site requires you to have a keyboard/mouse and a display larger than 800x600px.
+        `;
     } else {
         document.getElementById("offonline").innerHTML = `
         Name: <input type="text" id="name" autocomplete="off"> <button onclick="join()">
@@ -131,18 +134,30 @@ socket.on("message", (msg) => {
     } else if (msg[0] == "votestart") {
         // Player has cast a vote to start the game. the server, again, handles all of that
         document.getElementById("log").innerHTML = `
-            <span style="color: red;">${msg[1]} has cast a vote to start the game in ${msg[2].toLowerCase()} mode.</span><br>
+            <span style="color: red;">${msg[1]} has cast a vote to start the game.</span><br>
         `+document.getElementById("log").innerHTML;
     } else if (msg[0] == "voteholdstart") {
         // Player has cast a vote to hold the start of the game. guess what? the server handles all of that
         document.getElementById("log").innerHTML = `
             <span style="color: red;">${msg[1]} has cast a vote to hold the start of the game.</span><br>
         `+document.getElementById("log").innerHTML;
-    } else if (msg == "gamestart") {
+    } else if (msg[0] == "gamestart") {
         // game initialates and clients can play Alex Oliver's Monopoly
         console.log("!!!!!game has started!!!!!");
+
+        // create playerInformation so save locally all the player's card, money, tile, ect...
+        playerInformation = msg[1];
+
+        console.log("playerInformation:", playerInformation);
+
+        const keys = Object.keys(playerInformation);
+        let orderOfPlayers = keys.length?`${keys[0]} will go first`:"No players";
+        for (let i = 1; i < keys.length; i++) {
+            orderOfPlayers += `, then ${keys[i]}`;
+        }
+
         document.getElementById("log").innerHTML = `
-            <span style="color: red;">The game has started.</span><br>
+            <span style="color: red;">The game has started. ${orderOfPlayers}.</span><br>
         `+document.getElementById("log").innerHTML;
 
         // hide vote-start
@@ -176,11 +191,8 @@ function sendMessage() {
 }
 
 function voteStart(start) {
-    // get game type from <select> in html
-    const gameOption = document.getElementById("game-type").value;
-
     if (start) {
-        socket.send(["votestart", name, gameOption]);
+        socket.send(["votestart", name]);
 
         // show vote-hold-start and hide vote-start
         document.getElementById("vote-start").style.display = "none";
@@ -188,7 +200,7 @@ function voteStart(start) {
 
         console.log("voted to start");
     } else {
-        socket.send(["voteholdstart", name, gameOption]);
+        socket.send(["voteholdstart", name]);
 
         // show vote-hold-start and hide vote-start
         document.getElementById("vote-start").style.display = "inline";
