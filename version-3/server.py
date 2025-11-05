@@ -5,6 +5,7 @@ app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 clients = {}
+playerInformation = {}
 votekick = []
 voteStart = 0
 gameState = False
@@ -21,8 +22,16 @@ def handle_message(msg):
         clients[request.sid] = msg[1]
         votekick.append(msg[1])
         votekick.append(0)
-        
+
         clientsList = list(clients.values())
+
+        # add to playerInformation
+        playerInformation[msg[1]] = {
+            "tileNumber": 0,
+            "playerToken": len(clientsList),
+            "money": 0,
+            "cards": []
+        }
         
         send(["join", msg[1], clientsList], broadcast=True)
         print(f"join: {msg[1]}")
@@ -74,9 +83,9 @@ def handle_message(msg):
         print("votes to start:", voteStart, " and number of clients:", len(clientsList))
         if voteStart > len(clientsList)/2: # old version: voteStart >= (3*len(clients))/4
             gameState = True
-            send("gamestart", broadcast=True)
+            send(["gamestart", playerInformation], broadcast=True)
         else:
-            send(["votestart", msg[1], msg[2]], broadcast=True)
+            send(["votestart", msg[1]], broadcast=True)
     elif msg[0] == "voteholdstart":
         voteStart -= 1
         send(["voteholdstart", msg[1]], broadcast=True)
@@ -87,9 +96,12 @@ def handle_message(msg):
 def handle_disconnect():
     # sends to all clients that one of them as left
     
-    global gameState
+    global gameState, voteStart, playerInformation
 
+    # remove client from playerInformation and clients
+    del playerInformation[clients[request.sid]]
     name = clients.pop(request.sid, None)
+
     if name:
         clientsList = list(clients.values())
 
