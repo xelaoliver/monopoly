@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,7 +10,20 @@
 </head>
 
 <body>
-</body>
+<!-- preload all player-tokens -->
+<div style="display: none;">
+  <img id="player-token-barrow" src="player-tokens/barrow.png">
+  <img id="player-token-battleship" src="player-tokens/battleship.png">
+  <img id="player-token-boot" src="player-tokens/boot.png">
+  <img id="player-token-cannon" src="player-tokens/cannon.png">
+  <img id="player-token-car" src="player-tokens/car.png">
+  <img id="player-token-dog" src="player-tokens/dog.png">
+  <img id="player-token-horse" src="player-tokens/horse.png">
+  <img id="player-token-iron" src="player-tokens/iron.png">
+  <img id="player-token-thimble" src="player-tokens/thimble.png">
+  <img id="player-token-top-hat" src="player-tokens/top-hat.png">
+</div>
+
 <div style="text-align: center;" id="home">
 <!-- <div style="text-align: center; display: none;" id="home"> -->
   Alex Oliver's<br>
@@ -30,14 +42,6 @@
   <div class="left">
     <div class="name" style="background-color: #fce1f4;"><u>Game Information</u></div><br>
     <div style="text-align: center;" id="game-begin-options">
-      <select class="info-button" id="game-type">
-        <option title="Game goes on unitl you quit">Never ending economy</option>
-        <option title="Russian version">Communist</option>
-        <option title="First to $10,000 wins the game">First to £10,000</option>
-        <option title="First to $100,000 wins the game">First to £100,000</option>
-        <option title="First to $1,000,000 wins the game">First to £1,000,000</option>
-      </select><br><br>
-
       <button class="info-button" onclick="voteStart(true)" id="vote-start">Vote Start</button>
       <button class="info-button" onclick="voteStart(false)" style="display: none;" id="vote-hold-start">Vote Hold Start</button>
 
@@ -48,7 +52,7 @@
     Wealth: <span id="money-display"></span><br>
     <div style="display: flex; align-items: center; gap: 8px;">
       <span>Icon:</span>
-      <img src="tokens.png" id="display-token" style="width: 64px; height: 64px; object-fit: cover; object-position: left;">
+      <img src="player-tokens/battleship.png" id="display-token" style="object-position: left;">
     </div>
     Total turns: <span id="total-turns"></span>
 
@@ -72,4 +76,5 @@
     <div id="log" style="overflow: auto; line-break: anywhere; height: 100%; margin-top: -4px;"></div>
   </div>
 </div>
+</body>
 </html>
