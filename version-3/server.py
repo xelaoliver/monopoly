@@ -1,3 +1,5 @@
+# Alex Oliver, 2025
+
 from flask import Flask, request
 from flask_socketio import SocketIO, send
 
@@ -6,6 +8,7 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 clients = {}
 playerInformation = {}
+playerIndex = 0
 votekick = []
 voteStart = 0
 gameState = False
@@ -83,12 +86,17 @@ def handle_message(msg):
         print("votes to start:", voteStart, " and number of clients:", len(clientsList))
         if voteStart > len(clientsList)/2: # old version: voteStart >= (3*len(clients))/4
             gameState = True
-            send(["gamestart", playerInformation], broadcast=True)
+            send(["gamestart", playerInformation, playerIndex], broadcast=True)
         else:
             send(["votestart", msg[1]], broadcast=True)
     elif msg[0] == "voteholdstart":
         voteStart -= 1
         send(["voteholdstart", msg[1]], broadcast=True)
+    elif msg[0] == "tileNumber":
+        # update player's tile number (aka: position)
+        playerInformation[msg[1]]["tileNumber"] += msg[2]
+        
+        send(["tileNumberMove", msg[1], playerInformation], broadcast=True)
     else:
         send(msg, broadcast=True)
 
