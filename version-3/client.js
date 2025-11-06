@@ -1,8 +1,32 @@
+// Alex Oliver, 2025
+
 const socket = io("http://localhost:5000");
 var offonline = true;
 var nameVerify = false;
 var oldVoteKickName = "";
 var playerInformation = {};
+
+function spinDice() {
+    let spinDiceElement = document.getElementById("spin-dice-button");
+    spinDiceElement.style.display = "none"; // hide the button to spin dice
+
+    let increase = Math.floor(Math.random()*5+1);
+
+    console.log("rolled a:", increase);
+
+    socket.send(["tileNumber", name, increase]);
+
+    // do some turn stuff, based on what the player wants todo
+
+    socket.send(["endturn", name]); // tells server to move to next player... may need to auto-do this if client is not doing anything for 30 seconds, either on the client/server side
+}
+
+function takeTurn() {
+    let spinDiceElement = document.getElementById("spin-dice-button");
+    spinDiceElement.style.display = "inline"; // show the button to spin dice
+
+    // all other turn scripts are in the spinDice function as they are ment to be ran after you spin the dice
+}
 
 socket.on("connect", () => {
     console.log("yay. server is connected to client!");
@@ -150,10 +174,37 @@ socket.on("message", (msg) => {
 
         console.log("playerInformation:", playerInformation);
 
+        // prep. for changing the html to include the order in which the players will take their turn
+        let order = document.getElementById("order-of-turns");
+
+        // log the order in which the players will take their turn
         const keys = Object.keys(playerInformation);
-        let orderOfPlayers = keys.length?`${keys[0]} will go first`:"No players";
+        let orderOfPlayers = ""
+        if (keys[0] == name ){
+            orderOfPlayers += keys.length?"You will go first":"No players";
+
+            let playerListElement = document.createElement("li");
+            playerListElement.id = `turn-list-${name}`;
+            playerListElement.appendChild(document.createTextNode("<b>You</b>"));
+            order.appendChild(playerListElement);
+
+            // the client is free to take their turn: roll dice, trade, buy property, etc...
+            takeTurn();
+        } else {
+            orderOfPlayers += keys.length?`${keys[0]} will go first`:"No players";
+
+            let playerListElement = document.createElement("li");
+            playerListElement.id = `turn-list-${keys[0]}`;
+            playerListElement.appendChild(document.createTextNode(`<b>${keys[0]}</b>`));
+            order.appendChild(playerListElement);
+        }
         for (let i = 1; i < keys.length; i++) {
             orderOfPlayers += `, then ${keys[i]}`;
+
+            let playerListElement = document.createElement("li");
+            playerListElement.id = `turn-list-${keys[i]}`;
+            playerListElement.appendChild(document.createTextNode(keys[i]));
+            order.appendChild(playerListElement);
         }
 
         document.getElementById("log").innerHTML = `
@@ -162,6 +213,18 @@ socket.on("message", (msg) => {
 
         // hide vote-start
         document.getElementById("game-begin-options").style.display = "none";
+    } else if (msg[0] == "tileNumberMove") {
+        if (msg[1] == name) {
+            document.getElementById("log").innerHTML = `
+                <span style="color: red;">You've moved ${msg[2]} spaces to ${tileData[msg[2].msg[1].tileNumber]}.</span><br>`
+            +document.getElementById("log").innerHTML;
+        } else {
+            document.getElementById("log").innerHTML = `
+                <span style="color: red;">${msg[1]} has moved ${msg[2]} spaces to ${tileData[msg[2].msg[1].tileNumber]}.</span><br>`
+            +document.getElementById("log").innerHTML;
+        }
+
+        // tileData is in board.js, idk if it will live there, but i like it there. and i think it likes to stay there.
     }
 
     // scroll chat/game log to the top
@@ -211,7 +274,6 @@ function voteStart(start) {
 }
 
 function voteKick() {
-    // get client from <select> in html
     var voteKickName = document.getElementById("vote-kick").value;
 
     if (voteKickName != oldVoteKickName) {
