@@ -5,6 +5,8 @@ var offonline = true;
 var nameVerify = false;
 var oldVoteKickName = "";
 var playerInformation = {};
+var gameStart = false;
+var clientsThatHaveVoted = [];
 
 function spinDice() {
     let spinDiceElement = document.getElementById("spin-dice-button");
@@ -26,6 +28,41 @@ function takeTurn() {
     spinDiceElement.style.display = "inline"; // show the button to spin dice
 
     // all other turn scripts are in the spinDice function as they are ment to be ran after you spin the dice
+}
+
+
+function updateLists(name, NumberOfPlayers) {
+    document.getElementById("player-number").innerHTML = NumberOfPlayers;
+    document.getElementById("player-list").textContent = "";
+    for (let i = 0; i < NumberOfPlayers; i++) {
+        const client = document.createElement("li");
+
+        if (!gameStart) {
+            if (clientsThatHaveVoted.includes(name[i])) {
+                client.textContent = `${name[i]} (voted to start)`;
+                client.id = name[i];
+            } else {
+                client.textContent = `${name[i]} (not voted to start)`;
+                client.id = name[i];
+            }
+        } else {
+            client.textContent = name[i];
+            client.id = name[i];
+        }
+        
+        document.getElementById("player-list").appendChild(client);
+    }
+
+    // change vote-kick options so its in sync w/ the server
+    document.getElementById("vote-kick").textContent = "";
+    for (let i = 0; i < NumberOfPlayers; i++) {
+        const client = document.createElement("option");
+        client.textContent = name[i];
+        client.id = name[i];
+        client.value = name[i];
+        
+        document.getElementById("vote-kick").appendChild(client);
+    }
 }
 
 socket.on("connect", () => {
@@ -60,8 +97,16 @@ socket.on("message", (msg) => {
             , but a game is already in play.<br>Please wait until the game ends.`;
             console.log("game already in play");
         } else {
-            document.getElementById("offonline").innerHTML += ' and players will be waiting in the lobby.';
-            console.log("free game availaible");
+            if (msg[2]) {
+                document.getElementById("offonline").innerHTML = `
+                The server is <span style="color: green;">online</span>
+                , but we have reached the maximum amount of people that can join (10).`;
+
+                console.log("free game availaible");
+            } else {
+                document.getElementById("offonline").innerHTML += ' and players will be waiting in the lobby.';
+                console.log("free game availaible");
+            }
         }
 
         offonline = false;
@@ -72,48 +117,11 @@ socket.on("message", (msg) => {
         document.getElementById("log").innerHTML = `<span style="color: red;">${msg[1]} has left the game.</span><br>`+document.getElementById("log").innerHTML;
 
         // change player-number and player-list so its in sync w/ the server
-        document.getElementById("player-number").innerHTML = msg[2].length;
-        document.getElementById("player-list").textContent = "";
-        for (let i = 0; i < msg[2].length; i++) {
-            const client = document.createElement("li");
-            client.textContent = msg[2][i];
-            client.id = msg[2][i];
-            
-            document.getElementById("player-list").appendChild(client);
-        }
-
-        // change vote-kick options so its in sync w/ the server
-        document.getElementById("vote-kick").textContent = "";
-        for (let i = 0; i < msg[2].length; i++) {
-            const client = document.createElement("option");
-            client.textContent = msg[2][i];
-            client.id = msg[2][i];
-            client.value = msg[2][i];
-            
-            document.getElementById("vote-kick").appendChild(client);
-        }
+        updateLists(msg[2], len(msg[2]));
     } else if (msg[0] == "join") {
         // change player-number and player-list so its in sync w/ the server
-        document.getElementById("player-number").innerHTML = msg[2].length;
-        document.getElementById("player-list").textContent = "";
-        for (let i = 0; i < msg[2].length; i++) {
-            const client = document.createElement("li");
-            client.textContent = msg[2][i];
-            client.id = msg[2][i];
-            
-            document.getElementById("player-list").appendChild(client);
-        }
-
-        // change vote-kick options so its in sync w/ the server
-        document.getElementById("vote-kick").textContent = "";
-        for (let i = 0; i < msg[2].length; i++) {
-            const client = document.createElement("option");
-            client.textContent = msg[2][i];
-            client.id = msg[2][i];
-            client.value = msg[2][i];
-            
-            document.getElementById("vote-kick").appendChild(client);
-        }
+        // clients, number of clients
+        updateLists(msg[3], msg[2]);
 
         // Player has joined the game.
         document.getElementById("log").innerHTML = `<span style="color: red;">${msg[1]} has joined the game.</span><br>`+document.getElementById("log").innerHTML;
@@ -157,30 +165,52 @@ socket.on("message", (msg) => {
         `+document.getElementById("log").innerHTML;
     } else if (msg[0] == "votestart") {
         // Player has cast a vote to start the game. the server, again, handles all of that
-        document.getElementById("log").innerHTML = `
-            <span style="color: red;">${msg[1]} has cast a vote to start the game.</span><br>
-        `+document.getElementById("log").innerHTML;
+
+        if (msg[2] < 2) {
+            document.getElementById("log").innerHTML = `
+                <span style="color: red;">${msg[1]} has cast a vote to start the game, but we need 1 more person to join the game!</span><br>
+            `+document.getElementById("log").innerHTML;
+        } else {
+            document.getElementById("log").innerHTML = `
+                <span style="color: red;">${msg[1]} has cast a vote to start the game. We now need ${msg[2]-msg[3]} more votes to start the game!</span><br>
+            `+document.getElementById("log").innerHTML;
+        }
+
+        clientsThatHaveVoted.push(msg[1]);
+        updateLists(msg[4], msg[2]);
     } else if (msg[0] == "voteholdstart") {
         // Player has cast a vote to hold the start of the game. guess what? the server handles all of that
         document.getElementById("log").innerHTML = `
             <span style="color: red;">${msg[1]} has cast a vote to hold the start of the game.</span><br>
         `+document.getElementById("log").innerHTML;
+
+        clientsThatHaveVoted[clientsThatHaveVoted.indexOf(msg[1])] = ""; // remove from clientsThatHaveVoted
+
+        updateLists(msg[3], msg[2]);
     } else if (msg[0] == "gamestart") {
         // game initialates and clients can play Alex Oliver's Monopoly
         console.log("!!!!!game has started!!!!!");
 
+        gameStart = true;
+        updateLists(msg[4], msg[2]);
+
         // create playerInformation so save locally all the player's card, money, tile, ect...
         playerInformation = msg[1];
+
+        let pathsToToken = ["barrow", "battleship", "boot", "cannon", "car", "dog", "horse", "iron", "thimble", "top-hat"];
+
+        document.getElementById("display-token").src = `player-tokens/${pathsToToken[playerInformation.name.token]}.png`;
 
         console.log("playerInformation:", playerInformation);
 
         // prep. for changing the html to include the order in which the players will take their turn
         let order = document.getElementById("order-of-turns");
+        document.getElementById("order-of-turns-parent").style.display = "inline";
 
         // log the order in which the players will take their turn
         const keys = Object.keys(playerInformation);
         let orderOfPlayers = ""
-        if (keys[0] == name ){
+        if (keys[0] == name ) {
             orderOfPlayers += keys.length?"You will go first":"No players";
 
             let playerListElement = document.createElement("li");
