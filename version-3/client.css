@@ -22,6 +22,32 @@ hr {
     text-align: center;
 }
 
+.canvas-container {
+    position: relative;
+}
+
+canvas, .over-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* god, i have css.. thanks gpt! */
+.over-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;          /* fill parent */
+    z-index: 2;
+    padding: 6px;
+    display: flex;      /* enable flex centering */
+    flex-direction: column;
+    align-items: center;/* center children horizontally */
+    width: 100%;        /* full width so centering works predictably */
+    box-sizing: border-box;
+}
+
 .container {
     display: grid;
     grid-template-areas: "left center right";
