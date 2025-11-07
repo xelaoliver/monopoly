@@ -1,80 +1,101 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Alex Oliver's Monopoly</title>
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="client.css">
-  <script src="client.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Alex Oliver's Monopoly</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="client.css">
+    <script src="client.js"></script>
 </head>
 
 <body>
 <!-- preload all player-tokens -->
 <div style="display: none;">
-  <img id="player-token-barrow" src="player-tokens/barrow.png">
-  <img id="player-token-battleship" src="player-tokens/battleship.png">
-  <img id="player-token-boot" src="player-tokens/boot.png">
-  <img id="player-token-cannon" src="player-tokens/cannon.png">
-  <img id="player-token-car" src="player-tokens/car.png">
-  <img id="player-token-dog" src="player-tokens/dog.png">
-  <img id="player-token-horse" src="player-tokens/horse.png">
-  <img id="player-token-iron" src="player-tokens/iron.png">
-  <img id="player-token-thimble" src="player-tokens/thimble.png">
-  <img id="player-token-top-hat" src="player-tokens/top-hat.png">
+    <img id="player-token-barrow" src="player-tokens/barrow.png">
+    <img id="player-token-battleship" src="player-tokens/battleship.png">
+    <img id="player-token-boot" src="player-tokens/boot.png">
+    <img id="player-token-cannon" src="player-tokens/cannon.png">
+    <img id="player-token-car" src="player-tokens/car.png">
+    <img id="player-token-dog" src="player-tokens/dog.png">
+    <img id="player-token-horse" src="player-tokens/horse.png">
+    <img id="player-token-iron" src="player-tokens/iron.png">
+    <img id="player-token-thimble" src="player-tokens/thimble.png">
+    <img id="player-token-top-hat" src="player-tokens/top-hat.png">
 </div>
 
 <div style="text-align: center;" id="home">
 <!-- <div style="text-align: center; display: none;" id="home"> -->
-  Alex Oliver's<br>
-  <h1>Monopoly</h1><br>
+    Alex Oliver's<br>
+    <h1>Monopoly</h1><br>
 
-  <p><span id="offonline">
-    The server is <span style="color: red;">offline</span>
-    , run it on your WiFi network by
-    downloading <a href="https://github.com/xelaoliver/monopoly/blob/main/version-3/server.py" target="_blank">my
-    server</a>,<br>or ask someone with the server to turn it online.
-  </span></p>
+    <p><span id="offonline">
+        The server is <span style="color: red;">offline</span>
+        , run it on your WiFi network by
+        downloading <a href="https://github.com/xelaoliver/monopoly/blob/main/version-3/server.py" target="_blank">my
+        server</a>,<br>or ask someone with the server to turn it online.
+    </span></p>
 </div>
 
 <div id="game" class="container" style="display: none;">
 <!-- <div id="game" class="container"> -->
-  <div class="left">
-    <div class="name" style="background-color: #fce1f4;"><u>Game Information</u></div><br>
-    <div style="text-align: center;" id="game-begin-options">
-      <button class="info-button" onclick="voteStart(true)" id="vote-start">Vote Start</button>
-      <button class="info-button" onclick="voteStart(false)" style="display: none;" id="vote-hold-start">Vote Hold Start</button>
+    <div class="left">
+        <div class="name" style="background-color: #fce1f4;"><u>Game Information</u></div><br>
+        <div style="text-align: center;" id="game-begin-options">
+        <button class="info-button" onclick="voteStart(true)" id="vote-start">Vote Start</button>
+        <button class="info-button" onclick="voteStart(false)" style="display: none;" id="vote-hold-start">Vote Hold Start</button>
 
-      <hr>
+        <hr>
+        </div>
+
+        <div id="order-of-turns-parent" style="display: none;">
+            Order of turns: <ul id="order-of-turns"></ul><br>
+        </div>
+
+        Name: <span id="name-display"></span><br>
+        Wealth: <span id="money-display"></span><br>
+        <div style="display: flex; align-items: center; gap: 8px;">
+        <span>Icon:</span>
+        <img id="display-token" style="object-position: left;">
+        </div>
+        Total turns: <span id="total-turns">0</span>
+
+        <p style="text-align: center;">
+            <select class="info-button" style="width: calc(100% - 125px);" id="vote-kick"></select> <button onclick="voteKick()">Vote Kick</button><br>
+        </p>
+
+        <hr>
+        Player List (<span id="player-number"></span>):
+        <ul id="player-list"></ul><hr>
+        <div style="text-align: center;">Alex Oliver's Monopoly is open source, free to play and licensed under MIT.</div>
     </div>
+    <div class="center canvas-container" id="canvas-parent" style="width: 100%; height: 650px;">
+        <canvas id="canvas"></canvas>
+        <div class="over-canvas">
+            <!-- buttons and ui for trading, rolling dice, etc... -->
 
-    Name: <span id="name-display"></span><br>
-    Wealth: <span id="money-display"></span><br>
-    <div style="display: flex; align-items: center; gap: 8px;">
-      <span>Icon:</span>
-      <img src="player-tokens/battleship.png" id="display-token" style="object-position: left;">
+            <button id="spin-dice-button" style="width: 100px; height: 75px;">
+                Spin the<br>Dice!
+            </button>
+
+            <br><br>
+
+            <!-- 
+            <div style="border: 1px solid #cecece; display: block; width: 750px; height: 500px; padding: 7px; background-color: #fff;">
+                <div class="name" style="background-color: #e1fce9; width: calc(100% + 14px);"><u>Trade Window</u></div><br>
+
+                some cool ass trade options here
+            </div>
+            -->
+        </div>
     </div>
-    Total turns: <span id="total-turns"></span>
-
-    <p style="text-align: center;">
-      <select class="info-button" style="width: calc(100% - 125px);" id="vote-kick"></select> <button onclick="voteKick()">Vote Kick</button><br>
-    </p>
-
-    <hr>
-    Player List (<span id="player-number"></span>):
-    <ul id="player-list"></ul><hr>
-    <div style="text-align: center;">Alex Oliver's Monopoly is open source, free to play and licensed under MIT.</div>
-  </div>
-  <div class="center" id="canvas-parent" style="width: 100%; height: 650px;">
-    <canvas id="canvas"></canvas>
-  </div>
-  <div class="right">
-    <div class="name" style="background-color: #ffdeac;">
-      <u>Chat and Game Log</u>
-      <input id="message" type="text" style="width: 100%; margin-top: 8px;"><br><button onclick="sendMessage()" style="margin-top: 8px;">Send</button>
-    </div><br>
-    <div id="log" style="overflow: auto; line-break: anywhere; height: 100%; margin-top: -4px;"></div>
-  </div>
+    <div class="right">
+        <div class="name" style="background-color: #ffdeac;">
+            <u>Chat and Game Log</u>
+            <input id="message" type="text" style="width: 100%; margin-top: 8px;"><br><button onclick="sendMessage()" style="margin-top: 8px;">Send</button>
+        </div><br>
+        <div id="log" style="overflow: auto; word-break: break-word; height: 100%; margin-top: -4px;"></div>
+    </div>
 </div>
 </body>
 </html>
