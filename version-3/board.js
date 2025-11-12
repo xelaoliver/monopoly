@@ -10,6 +10,11 @@ var sprites = [];
 const tile = {"width": (200-(25.6*2))/9, "height": 25.6}
 var cameraRotation = {"x": 0, "y": 0};
 
+// mouse rotation
+let isDragging = false;
+let lastPointer = {x: 0, y: 0}
+const rotateSensitivity = .005;
+
 const colours = {
     "brown": "#934926", "aqua": "#b9e0f5", "pink": "#d52c87",
     "orange": "#f29104", "red": "#de1a18", "yellow": "#fcdb10",
@@ -54,6 +59,47 @@ const tileData = [
     ["Mayfair", colours.blue, 400]
 ]
 
+// code from stackoverflow, i can't do html/js mouse interactions. the pros can tho... {
+canvas.style.touchAction = "none";
+
+canvas.addEventListener("pointerdown", (e) => {
+    isDragging = true;
+    lastPointer.x = e.clientX;
+    lastPointer.y = e.clientY;
+
+    try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
+});
+
+canvas.addEventListener("pointermove", (e) => {
+    if (!isDragging) {
+        return;
+    }
+
+    const dx = e.clientX-lastPointer.x;
+    const dy = e.clientY-lastPointer.y;
+
+    cameraRotation.y += dx*rotateSensitivity;
+    cameraRotation.x += -dy*rotateSensitivity;
+
+    // ensure board doesn't flip
+    cameraRotation.x = Math.max(0, Math.min(Math.PI/2, cameraRotation.x));
+
+    lastPointer.x = e.clientX;
+    lastPointer.y = e.clientY;
+
+    e.preventDefault();
+});
+
+canvas.addEventListener("pointerup", (e) => {
+    isDragging = false;
+    try { canvas.releasePointerCapture(e.pointerId); } catch (err) {}
+});
+
+canvas.addEventListener("pointercancel", () => {
+    isDragging = false;
+});
+// } end of code from stackoverflow, the rest is my own personal hacking and tinkering
+
 // syntax for how tile coords are in the boardModel [x1, y1, x2, y2, x3, y3, x4, y4, tileData[tileIndex]]
 
 // main board
@@ -63,6 +109,33 @@ boardModel.push([
     100, 100, 0,
     -100, 100, 0,
     1
+]);
+
+//community chest
+boardModel.push([
+    71-100, 35-100, 0,
+    94-100, 58-100, 0,
+    58-100, 95-100, 0,
+    35-100, 71-100, 0,
+    14
+]);
+
+// chance
+boardModel.push([
+    (71+71)-100, (35+71)-100, 0,
+    (94+71)-100, (58+71)-100, 0,
+    (58+71)-100, (95+71)-100, 0,
+    (35+71)-100, (71+71)-100, 0,
+    14
+]);
+
+// logo
+boardModel.push([
+    (71+71)-100, (35+71)-100, 0,
+    (94+71)-100, (58+71)-100, 0,
+    (58+71)-100, (95+71)-100, 0,
+    (35+71)-100, (71+71)-100, 0,
+    14
 ]);
 
 // bottom
@@ -136,7 +209,7 @@ function applyRotation(coords) {
     const y1 =  Math.sin(cameraRotation.y)*x+Math.cos(cameraRotation.y)*y;
     const z1 = z;
 
-    // pitch (rotate around X)
+    // pitch (rotate around x)
     const y2 =  Math.cos(cameraRotation.x)*y1-Math.sin(cameraRotation.x)*z1;
     const z2 =  Math.sin(cameraRotation.x)*y1+Math.cos(cameraRotation.x)*z1;
 
@@ -199,12 +272,8 @@ function loop() {
         let size = 180/coords[2];
         let width = 32*size; let height = 32*size;
 
-        console.log(width, height);
         ctx.drawImage(document.getElementById(`player-token-${tile[3]}`), coords[0]-width/2, coords[1]-height, width, height);
     }
-
-    // change camera rotation
-    cameraRotation.y += .02;
 }
 
 cameraRotation.x += Math.PI/3;
