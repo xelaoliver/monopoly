@@ -117,7 +117,7 @@ socket.on("message", (msg) => {
         document.getElementById("log").innerHTML = `<span style="color: red;">${msg[1]} has left the game.</span><br>`+document.getElementById("log").innerHTML;
 
         // change player-number and player-list so its in sync w/ the server
-        updateLists(msg[2], len(msg[2]));
+        updateLists(msg[2], msg[2].length);
     } else if (msg[0] == "join") {
         // change player-number and player-list so its in sync w/ the server
         // clients, number of clients
